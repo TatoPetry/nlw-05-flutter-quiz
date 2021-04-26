@@ -1,6 +1,7 @@
 import 'package:DevQuiz/challenge/widgets/next_button/next_button_widget.dart';
 import 'package:DevQuiz/challenge/widgets/question_indicator/question_indicator_widget.dart';
 import 'package:DevQuiz/challenge/widgets/quiz/quiz_widget.dart';
+import 'package:DevQuiz/result/result_page.dart';
 import 'package:DevQuiz/shared/models/question_model.dart';
 import 'package:flutter/material.dart';
 
@@ -8,8 +9,11 @@ import 'challenge_controller.dart';
 
 class ChallengePage extends StatefulWidget {
   final List<QuestionModel> questions;
+  final String title;
     
-  ChallengePage({Key? key, required this.questions}) : super(key: key);
+  ChallengePage({Key? key, 
+    required this.questions, 
+    required this.title}) : super(key: key);
 
   @override
   _ChallengePageState createState() => _ChallengePageState();
@@ -23,6 +27,12 @@ class _ChallengePageState extends State<ChallengePage> {
     pageController.nextPage(
       duration: Duration(milliseconds: 10), 
       curve: Curves.linear);    
+  }
+  void onSelected(bool value) {
+    if (value) {
+      controller.answersRight++;
+    }
+    nextPage();
   }
 
   @override
@@ -56,7 +66,7 @@ class _ChallengePageState extends State<ChallengePage> {
         physics: NeverScrollableScrollPhysics(),
         controller: pageController,
         children: widget.questions.map((e) => 
-          QuizWidget(question: e, onChange: nextPage,)
+          QuizWidget(question: e, onSelected: onSelected)
         ).toList()
         ),
       bottomNavigationBar: SafeArea(
@@ -73,7 +83,11 @@ class _ChallengePageState extends State<ChallengePage> {
               // SizedBox(width: 7),
               if (value == widget.questions.length) 
               Expanded(child: NextButtonWidget.green(label: "Confirmar", onTap: () => {
-                Navigator.pop(context)
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ResultPage(
+                  result: controller.answersRight,
+                  length: widget.questions.length,
+                  title: widget.title)
+                  ))
               },))
             ],),
           ),
